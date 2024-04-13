@@ -1,0 +1,22 @@
+.login {
+  min-height: 80vh;
+  margin: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+
+  .misc {
+    font-size: var(--fs-350);
+    color: var(--fc-primary);
+
+    a {
+      color: var(--accent-600);
+      // font-weight: 600;
+
+      text-decoration: none;
+    }
+  }
+}
