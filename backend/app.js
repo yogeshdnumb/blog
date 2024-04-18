@@ -6,12 +6,18 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const cors = require('cors');
 
-const indexRouter = require("./routes/indexRouter");
+const authRouter = require("./routes/authRouter");
 const apiRouter = require("./routes/apiRouter");
-const { authMiddleware } = require("./middlewares/authMiddleware");
+const authMiddleware = require("./middlewares/authMiddleware");
 
 const app = express();
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
+//   credentials: true
+// }))
 
 mongoose.set("strictQuery", false);
 const mongoDbUrl = process.env.MONGODB_URL_PROD || process.env.MONGODB_URL_DEV;
@@ -29,10 +35,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use(authMiddleware)
-
-
+app.get("/", function (req, res) {
+  res.send('e')
+})
+app.use("/auth", authRouter);
+// app.use(authMiddleware.isAuthenticated)
 app.use("/api", apiRouter);
 
 

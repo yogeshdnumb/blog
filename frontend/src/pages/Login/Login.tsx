@@ -1,70 +1,95 @@
+import { useContext, useEffect, useRef, useState } from "react";
+import axios from "../../api/axios.js";
+
 import styles from "./Login.module.scss";
-import Input from "src/components/Input/Input";
-import Button from "src/components/Button/Button";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { authContext } from "../../contexts/authContext.js";
+import useRefreshToken from "../../hooks/useRefreshToken.js";
 
 export default function Login() {
+  const refresh = useRefreshToken();
+  const { setAuth } = useContext(authContext);
+
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState([]);
+  const [pwd, setPwd] = useState("");
+
+  const [errMsg, setErrMsg] = useState("");
+
+  const usernameRef = useRef();
+  const errRef = useRef();
+
+  useEffect(() => {
+    usernameRef.current.focus();
+  }, []);
+
+  useEffect(() => {
+    setErrMsg("");
+  }, [username, pwd]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "/auth/login",
+        JSON.stringify({ username, password: pwd }),
+        {
+          headers: {
+            "Content-type": "application/json",
+            withCredentials: true,
+          },
+        }
+      );
+      // console.log(response.data);
+      setAuth({ accessToken: response?.data?.accessToken });
+    } catch (err) {
+      console.error(err);
+
+      if (!err?.response) {
+        setErrMsg("No server response");
+      } else if (err.response?.status == 400) {
+        setErrMsg("Username or Password missing");
+      } else if (err.response?.status == 401) {
+        setErrMsg("Unauthorized");
+      } else {
+        setErrMsg("Login failed");
+      }
+    }
+  }
 
   return (
-    <form className={styles.login}>
-      <Input
-        id="username"
-        name="username"
-        label="username or email"
-        onChange={(e) => {
-          setUsername(e.target.value);
-        }}
-      ></Input>
-      <Input
-        id="password"
-        name="password"
-        label="password"
-        type="password"
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-      ></Input>
-      <Button
-        onClick={async () => {
-          console.log("log bth clk");
-          const response = await fetch("http://localhost:3000/login", {
-            mode: "cors",
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json;charset=utf-8",
-            },
-            // credentials: "same-origin",
-            credentials: "include",
-            body: JSON.stringify({ username, password }),
-          });
-          const headers = response.headers;
-          const json = await response.json();
-          if (response.status == 400) {
-            setErrors(json.errors);
-          } else {
-            console.log(json, headers, headers.get("a"));
-          }
-          // console.log(errors, json);
+    <div className={styles.Login}>
+      {errMsg && <p ref={errRef}>{errMsg}</p>}
+
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            ref={usernameRef}
+            onChange={(e) => setUsername(e.target.value)}
+            value={username}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="text"
+            id="password"
+            onChange={(e) => setPwd(e.target.value)}
+            value={pwd}
+            required
+          />
+        </div>
+        <button>Sign In</button>
+      </form>
+      <button
+        onClick={() => {
+          refresh();
         }}
       >
-        Login
-      </Button>
-
-      <ul>
-        {[].map((err) => {
-          return <li> {err.msg}</li>;
-        })}
-      </ul>
-
-      <div className={styles.misc}>
-        <p>
-          First time? <Link to="/register">Register</Link>
-        </p>
-      </div>
-    </form>
+        refresh
+      </button>
+    </div>
   );
 }
