@@ -2,19 +2,21 @@ import styles from "./Register.module.scss";
 
 import { useEffect, useRef, useState } from "react";
 import axios from "../../api/axios.js";
+import { Link } from "react-router-dom";
+import { Lock, User } from "react-feather";
 
 export default function Register() {
   const [username, setUsername] = useState("");
   // const [isUsernameValid, setIsUsernameValid] = useState(false);
-  // const [isUsernameFocus, setIsUsernameFocus] = useState(false);
+  const [isUsernameFocus, setIsUsernameFocus] = useState(false);
 
   const [pwd, setPwd] = useState("");
   // const [isPwdValid, setIsPwdValid] = useState(false);
-  // const [isPwdFocus, setIsPwdFocus] = useState(false);
+  const [isPwdFocus, setIsPwdFocus] = useState(false);
 
   const [confirmPwd, setConfirmPwd] = useState("");
   // const [isConfirmPwdValid, setIsConfirmPwdValid] = useState(false);
-  // const [isConfirmPwdFocus, setIsConfirmPwdFocus] = useState(false);
+  const [isConfirmPwdFocus, setIsConfirmPwdFocus] = useState(false);
 
   const [errMsg, setErrMsg] = useState("");
   // const [success, setSuccess] = useState(false);
@@ -47,7 +49,6 @@ export default function Register() {
         {
           headers: {
             "Content-type": "application/json",
-            withCredentials: true,
           },
         }
       );
@@ -66,14 +67,15 @@ export default function Register() {
 
   return (
     <div className={styles.Register}>
-      {errMsg && <p ref={errRef}>{errMsg}</p>}
+      <h1>Welcome!</h1>
+
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">
-            Username
-            {isUsernameValid && "✅"}
-            {!isUsernameValid && username && "❌"}
-          </label>
+        {errMsg && (
+          <p ref={errRef} className={styles.errMsg}>
+            {errMsg}
+          </p>
+        )}
+        <div className={styles.usernameContainer}>
           <input
             type="text"
             id="username"
@@ -81,6 +83,7 @@ export default function Register() {
             onChange={(e) => setUsername(e.target.value)}
             ref={usernameRef}
             required
+            placeholder=""
             aria-invalid={isUsernameValid ? "false" : "true"}
             aria-describedby="usernameNote"
             onFocus={() => {
@@ -90,20 +93,22 @@ export default function Register() {
               setIsUsernameFocus(false);
             }}
           />
+          <label htmlFor="username">
+            <User></User>
+            Username
+            {/* {isUsernameValid && "✔️"} */}
+            {!isUsernameValid && username && "❌"}
+          </label>
           {!isUsernameValid && username && <p id="usernameNote">{">2"}</p>}
         </div>
-        <div>
-          <label htmlFor="pwd">
-            Password
-            {isPwdValid && "✅"}
-            {!isPwdValid && pwd && "❌"}
-          </label>
+        <div className={styles.passwordContainer}>
           <input
             type="text"
             id="pwd"
             value={pwd}
             onChange={(e) => setPwd(e.target.value)}
             required
+            placeholder=""
             aria-invalid={isPwdValid ? "false" : "true"}
             aria-describedby="pwdNote"
             onFocus={() => {
@@ -113,20 +118,22 @@ export default function Register() {
               setIsPwdFocus(false);
             }}
           />
+          <label htmlFor="pwd">
+            <Lock></Lock>
+            Password
+            {/* {isPwdValid && "✔️"} */}
+            {!isPwdValid && pwd && "❌"}
+          </label>
           {!isPwdValid && pwd && <p id="pwdNote">{">2"}</p>}
         </div>
-        <div>
-          <label htmlFor="confirmPwd">
-            Cofirm Password
-            {isConfirmPwdValid && "✅"}
-            {!isConfirmPwdValid && confirmPwd && "❌"}
-          </label>
+        <div className={styles.confirmPwdContainer}>
           <input
             type="text"
             id="confirmPwd"
             value={confirmPwd}
             onChange={(e) => setConfirmPwd(e.target.value)}
             required
+            placeholder=""
             aria-invalid={isConfirmPwdValid ? "false" : "true"}
             aria-describedby="confirmPwdNote"
             onFocus={() => {
@@ -136,6 +143,12 @@ export default function Register() {
               setIsConfirmPwdFocus(false);
             }}
           />
+          <label htmlFor="confirmPwd">
+            <Lock></Lock>
+            Cofirm Password
+            {/* {isConfirmPwdValid && "✔️"} */}
+            {!isConfirmPwdValid && confirmPwd && " ❌"}
+          </label>
           {!isConfirmPwdValid && confirmPwd && (
             <p id="confirmPwdNote">{"should match password"}</p>
           )}
@@ -147,16 +160,12 @@ export default function Register() {
             styles.disabled
           }
         >
-          Submit
+          Login
         </button>
       </form>
-      <p>
-        Already registered?
-        <br />
-        <span className="line">
-          {/*put router link here*/}
-          <a href="#">Sign In</a>
-        </span>
+      <p className={styles.misc}>
+        or
+        <Link to="/login"> Login</Link>
       </p>
     </div>
   );

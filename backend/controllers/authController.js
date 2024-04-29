@@ -45,6 +45,7 @@ exports.register_post = [
             console.log(hashPassword);
             foundUser.username = req.body.username;
             foundUser.password = hashPassword;
+            foundUser.roles = ["user"]
             await foundUser.save();
 
             res.status(201).json({ msg: "User Created" });
@@ -86,13 +87,13 @@ exports.login_post = [
 
         const match = await bcrypt.compare(req.body.password, foundUser.password)
         if (match) {
-          const accessToken = jwt.sign({ username: foundUser.username }, process.env.ACCESS_SECRET, { expiresIn: "15m" })
-          const refreshToken = jwt.sign({ username: foundUser.username }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
+          const accessToken = jwt.sign({ userInfo: { username: foundUser.username, roles: foundUser.roles } }, process.env.ACCESS_SECRET, { expiresIn: process.env.ACCESS_EXPIRY })
+          const refreshToken = jwt.sign({ username: foundUser.username }, process.env.REFRESH_SECRET, { expiresIn: process.env.REFRESH_EXPIRY })
 
           foundUser.refreshToken = refreshToken
           await foundUser.save()
 
-          res.cookie('rt', refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true }).status(200).json({ msg: "Pass match", accessToken })
+          res.cookie('rt', refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true }).status(200).json({ msg: "Pass match", username: foundUser.username, roles: foundUser.roles, accessToken })
 
 
         } else {
@@ -128,8 +129,8 @@ exports.refresh_get = asyncHandler(async function (req, res, next) {
       return res.status(403).json({ msg: "found usename!=decoded name" })
     }
     else {
-      const accessToken = jwt.sign({ username: foundUser.username }, process.env.ACCESS_SECRET, { expiresIn: "15m" })
-      return res.status(203).json({ msg: 'access token refreshed', accessToken })
+      const accessToken = jwt.sign({ userInfo: { username: foundUser.username, roles: foundUser.roles } }, process.env.ACCESS_SECRET, { expiresIn: process.env.ACCESS_EXPIRY })
+      return res.status(203).json({ msg: 'access token refreshed', accessToken, roles: foundUser.roles })
     }
   })
 

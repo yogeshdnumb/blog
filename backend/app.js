@@ -13,12 +13,17 @@ const apiRouter = require("./routes/apiRouter");
 const authMiddleware = require("./middlewares/authMiddleware");
 
 const app = express();
-// app.use(cors({
-//   origin: 'http://localhost:3000',
-//   methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
-//   credentials: true
-// }))
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,            //access-control-allow-credentials:true
+  // optionSuccessStatus: 200
+}))
 
+/* app.use((req, res, next) => {
+  console.log(req.headers);
+  next()
+})
+ */
 mongoose.set("strictQuery", false);
 const mongoDbUrl = process.env.MONGODB_URL_PROD || process.env.MONGODB_URL_DEV;
 mongoose.connect(mongoDbUrl).catch((err) => {
@@ -39,7 +44,7 @@ app.get("/", function (req, res) {
   res.send('e')
 })
 app.use("/auth", authRouter);
-// app.use(authMiddleware.isAuthenticated)
+app.use(authMiddleware.isAuthenticated)
 app.use("/api", apiRouter);
 
 

@@ -1,18 +1,30 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "../../api/axios.js";
 
 import styles from "./Login.module.scss";
-import { authContext } from "../../contexts/authContext.js";
 import useRefreshToken from "../../hooks/useRefreshToken.js";
+import useAuth from "../../hooks/useAuth.js";
+import { useNavigate, Link } from "react-router-dom";
+
+import { Lock, User, Eye, EyeOff } from "react-feather";
+
+/* import userIcon from "../../assets/user.svg";
+import pwdIcon from "../../assets/lock.svg" */
+
+// import feather from "feather-icons";
 
 export default function Login() {
-  const refresh = useRefreshToken();
-  const { setAuth } = useContext(authContext);
+  const navigate = useNavigate();
+  // const refresh = useRefreshToken();
+
+  const { setAuth, auth } = useAuth();
 
   const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
 
   const [errMsg, setErrMsg] = useState("");
+
+  const [isPwdVisible, setIsPwdVisible] = useState(false);
 
   const usernameRef = useRef();
   const errRef = useRef();
@@ -34,14 +46,18 @@ export default function Login() {
         {
           headers: {
             "Content-type": "application/json",
-            withCredentials: true,
           },
         }
       );
-      // console.log(response.data);
-      setAuth({ accessToken: response?.data?.accessToken });
+      console.log(response.data, auth);
+
+      setAuth({
+        accessToken: response?.data?.accessToken,
+        roles: response?.data?.roles,
+      });
+      navigate("/articles");
     } catch (err) {
-      console.error(err);
+      // console.error(err);
 
       if (!err?.response) {
         setErrMsg("No server response");
@@ -57,11 +73,15 @@ export default function Login() {
 
   return (
     <div className={styles.Login}>
-      {errMsg && <p ref={errRef}>{errMsg}</p>}
+      <h1>Welcome!</h1>
 
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
+        {errMsg && (
+          <p ref={errRef} className={styles.errMsg}>
+            {errMsg}
+          </p>
+        )}
+        <div className={styles.usernameContainer}>
           <input
             type="text"
             id="username"
@@ -69,27 +89,43 @@ export default function Login() {
             onChange={(e) => setUsername(e.target.value)}
             value={username}
             required
+            placeholder=""
           />
+          <label htmlFor="username">
+            <User></User>
+            Username
+          </label>
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
+        <div className={styles.usernameContainer}>
           <input
-            type="text"
+            type={isPwdVisible ? "text" : "password"}
             id="password"
             onChange={(e) => setPwd(e.target.value)}
             value={pwd}
             required
+            placeholder=""
           />
+          <label htmlFor="password">
+            <Lock></Lock>
+            Password
+          </label>
+          <span
+            onClick={() => {
+              setIsPwdVisible(!isPwdVisible);
+            }}
+          >
+            {isPwdVisible ? (
+              <Eye className={styles.eye}></Eye>
+            ) : (
+              <EyeOff className={styles.eye}></EyeOff>
+            )}
+          </span>
         </div>
-        <button>Sign In</button>
+        <button>Login</button>
       </form>
-      <button
-        onClick={() => {
-          refresh();
-        }}
-      >
-        refresh
-      </button>
+      <p className={styles.misc}>
+        Or <Link to={"/register"}>Register</Link>
+      </p>
     </div>
   );
 }
