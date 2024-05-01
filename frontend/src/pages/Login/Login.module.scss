@@ -25,7 +25,7 @@
 
     gap: 2rem;
     width: 100%;
-    padding: 1rem;
+    // padding: 1rem;
 
     // background: #fff7ed;
 
@@ -66,7 +66,11 @@
     outline: 0;
     border: 2px solid var(--acc-clr-2);
     border-radius: 4px;
+    cursor: pointer;
     // border: 0;
+  }
+  button:focus {
+    border: 3px solid var(--acc-clr-4);
   }
 
   label {

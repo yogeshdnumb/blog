@@ -160,7 +160,7 @@ export default function Register() {
             styles.disabled
           }
         >
-          Login
+          Register
         </button>
       </form>
       <p className={styles.misc}>
